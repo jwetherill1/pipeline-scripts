@@ -17,5 +17,5 @@ rm response.json
 aws s3api put-object-tagging \
     --bucket saks-ml \
     --key search/autocomplete/artifacts/Autocomplete_Index_Builder-assembly-8-fc5bdc6-1.0.jar \
-    --tagging '{"TagSet": [{ "Key": "deployed_to_prod_2", "Value": "false" }, { "Key": "deployed_to_stage_2", "Value": "false" } ]}'
+    --tagging '{"TagSet": [{ "Key": "deployed_to_prod_3", "Value": "false" }, { "Key": "deployed_to_stage_3", "Value": "false" } ]}'
 
