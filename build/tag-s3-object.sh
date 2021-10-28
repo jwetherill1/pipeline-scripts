@@ -23,7 +23,8 @@ case "${GO_PIPELINE_NAME}" in
     bw-jw-build)
       export BuildTimestamp=$(date "+%Y-%m-%d %H:%M:%S")
       export BuiltBy=${GO_TRIGGER_USER}
-      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"},{"Key": "BuiltBy", "Value": "'${BuiltBy}'"}]' RemoveVersion.json > AddedKey.json
+#      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"},{"Key": "BuiltBy", "Value": "'${BuiltBy}'"}]' RemoveVersion.json > AddedKey.json
+      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"}'"}]' RemoveVersion.json > AddedKey.json
       ;;
     bw-jw-dev-etl)
       ;;
