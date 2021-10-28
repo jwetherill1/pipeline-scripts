@@ -40,6 +40,6 @@ case "${GO_PIPELINE_NAME}" in
       echo "GO_PIPELINE_NAME IS ${GO_PIPELINE_NAME}"
   esac
 
-aws s3api put-object-tagging  --bucket $bucket --key $aws_path/$newjar --body $path/$newjar --tagging file://AddedKey.json
+aws s3api put-object-tagging  --bucket $bucket --key $aws_path/$newjar --tagging file://AddedKey.json
 
 
