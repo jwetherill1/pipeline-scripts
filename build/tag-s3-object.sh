@@ -14,7 +14,8 @@ export AWS_SESSION_TOKEN=$( cat response.json | python3 -c "import sys, json; pr
 rm response.json
 
 json=$(aws s3api get-object-tagging --bucket ${bucket} --key "search/autocomplete/artifacts/Autocomplete_Index_Builder-assembly-8-fc5bdc6-1.0.jar")
- json=$(jq 'del(.VersionId)' <<< "$json")
+#json=$(jq 'del(.VersionId)' <<< "$json")
+json=$(echo $json | jq 'del(.VersionId)' )
 
 export Timestamp=$(date "+%Y-%m-%d:%H:%M:%S")
 
