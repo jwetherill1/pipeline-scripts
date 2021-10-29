@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # tag jar object in S3
 
