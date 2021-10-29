@@ -13,34 +13,51 @@ export AWS_ACCESS_KEY_ID=$( cat response.json | python3 -c "import sys, json; pr
 export AWS_SESSION_TOKEN=$( cat response.json | python3 -c "import sys, json; print(json.load(sys.stdin)['Credentials']['SessionToken'])")
 rm response.json
 
-#aws s3api put-object --bucket $bucket --key $aws_path/$newjar --body $path/$newjar --grant-full-control id="46b085a8a19b045302498d68f3c1eb4c467f05759246543d1c4ecf140411e49e"
+json=$(aws s3api get-object-tagging --bucket ${bucket} --key "search/autocomplete/artifacts/Autocomplete_Index_Builder-assembly-8-fc5bdc6-1.0.jar")
+json=$(jq 'del(.VersionId)' <<< "$json")
 
-aws s3api get-object-tagging --bucket ${bucket} --key ${aws_path}/${new_jar} > CurrentTags.json
-
-jq 'del(.VersionId)' CurrentTags.json > RemoveVersion.json
+export Timestamp=$(date "+%Y-%m-%d:%H:%M:%S")
 
 case "${GO_PIPELINE_NAME}" in
     bw-jw-build)
-      export BuildTimestamp=$(date "+%Y-%m-%d:%H:%M:%S")
-      export BuiltBy=${GO_TRIGGER_USER}
-#      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"},{"Key": "BuiltBy", "Value": "'${BuiltBy}'"}]' RemoveVersion.json > AddedKey.json
-#      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"}]' RemoveVersion.json > AddedKey.json
-      jq '.TagSet += [{"Key": "BuildTimeStamp", "Value": "'${BuildTimestamp}'"},{"Key": "BuiltBy", "Value": "'${BuiltBy}'"}]' RemoveVersion.json > AddedKey.json
+      json=$(jq 'del(.TagSet[] | select(.Key == "Build"))' <<< "$json")
+      json=$(jq '.TagSet += [{"Key": "Build", "Value": "'${Timestamp}'"}]' <<< "$json")
       ;;
-    bw-jw-dev-etl)
+    bw-jw-dev-etl | bw-jw-dev-etl-cron)
+      json=$(jq 'del(.TagSet[] | select(.Key == "DevLastRun"))' <<< "$json")
+      json=$(jq '.TagSet += [{"Key": "DevLastRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      if [ -z "$(jq '.TagSet[] | select(.Key=="DevFirstRun").Value' <<< "$json")" ]
+      then
+        json=$(jq '.TagSet += [{"Key": "DevFirstRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      fi
       ;;
-    bw-jw-stage-etl)
+    bw-jw-stage-etl | bw-jw-stage-etl-cron)
+      json=$(jq 'del(.TagSet[] | select(.Key == "StageLastRun"))' <<< "$json")
+      json=$(jq '.TagSet += [{"Key": "StageLastRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      if [ -z "$(jq '.TagSet[] | select(.Key=="StageFirstRun").Value' <<< "$json")" ]
+      then
+        json=$(jq '.TagSet += [{"Key": "StageFirstRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      fi
       ;;
-    bw-jw-stage-etl-cron)
-      ;;
-    bw-jw-prod-etl)
-      ;;
-    bw-jw-prod-etl-cron)
+    bw-jw-prod-etl | bw-jw-prod-etl-cron)
+      json=$(jq 'del(.TagSet[] | select(.Key == "ProdLastRun"))' <<< "$json")
+      json=$(jq '.TagSet += [{"Key": "ProdLastRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      if [ -z "$(jq '.TagSet[] | select(.Key=="ProdFirstRun").Value' <<< "$json")" ]
+      then
+        json=$(jq '.TagSet += [{"Key": "ProdFirstRun", "Value": "'${Timestamp}'"}]' <<< "$json")
+      fi
+
+      if [ -z "$(jq '.TagSet[] | select(.Key=="ProdRunCount").Value' <<< "$json")" ]
+      then
+        json=$(jq '.TagSet += [{"Key": "ProdRunCount", "Value": "1"}]' <<< "$json")
+      else
+        tagCount=$(jq '.TagSet[] | select(.Key=="ProdRunCount").Value | tonumber | .+1 '  <<< "$json")
+        json=$(jq 'del(.TagSet[] | select(.Key == "ProdRunCount"))' <<< "$json")
+        json=$(jq '.TagSet += [{"Key": "ProdRunCount", "Value": "'${tagCount}'"}]' <<< "$json")
+      fi
       ;;
     *)
       echo "GO_PIPELINE_NAME IS ${GO_PIPELINE_NAME}"
   esac
-
-aws s3api put-object-tagging  --bucket $bucket --key $aws_path/$newjar --tagging file://AddedKey.json
-
-
+cat <<< "$json" > final.json
+aws s3api put-object-tagging  --bucket $bucket --key $aws_path/$newjar --tagging file://final.json
