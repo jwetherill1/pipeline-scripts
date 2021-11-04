@@ -33,9 +33,9 @@ export timestamp=$(date "+%Y-%m-%d %H:%M:%S")
 echo ${GO_PIPELINE_NAME}
 
 
-if [[ "${GO_PIPELINE_NAME}" == "bw-jw-build" ]]; then
+if [[ "${GO_PIPELINE_NAME}" == "autocomplete-build" ]]; then
     replaceTag "Build" "${json}" "${timestamp}"
-elif [[ "${GO_PIPELINE_NAME}" == *"dev"* ]]; then    
+elif [[ "${GO_PIPELINE_NAME}" == *"bw-jw-build"* ]]; then    
     replaceTag "DevLastRun" "${json}" "${timestamp}"
     addTag "DevFirstRun" "${json}" "${timestamp}" 
 elif [[ "${GO_PIPELINE_NAME}" == *"stage"* ]]; then
