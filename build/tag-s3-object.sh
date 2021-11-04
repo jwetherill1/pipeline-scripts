@@ -19,6 +19,7 @@ addTag () {
 #newjar=Autocomplete_Index_Builder-assembly-$GO_PIPELINE_LABEL-1.0.jar
 newjar=Autocomplete_Index_Builder-assembly-12-33adb64-1.0.jar
 aws_path=search/autocomplete/artifacts
+S3_BUCKET=saks-ml
 
 aws_creds=$( aws sts assume-role --role-arn arn:aws:iam::326027360148:role/EMR_EC2_DefaultRole --role-session-name gocd-run-emr-etl )
 export AWS_SECRET_ACCESS_KEY=$( echo ${aws_creds} | jq --raw-output .Credentials.SecretAccessKey)
