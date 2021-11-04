@@ -33,8 +33,7 @@ export timestamp=$(date "+%Y-%m-%d %H:%M:%S")
 echo ${GO_PIPELINE_NAME}
 
 
-if [[ "${GO_PIPELINE_NAME}" == "autocomplete-build" ]]; then
-    echo "got here"
+if [[ "${GO_PIPELINE_NAME}" == "bw-jw-build" ]]; then
     replaceTag "Build" "${json}" "${timestamp}"
 elif [[ "${GO_PIPELINE_NAME}" == *"dev"* ]]; then    
     replaceTag "DevLastRun" "${json}" "${timestamp}"
@@ -52,5 +51,4 @@ elif [[ "${GO_PIPELINE_NAME}" == *"prod"* ]]; then
         addTag "ProdRunCount" "${json}" "1"
     fi
 fi
-echo "GO_PIPELINE_NAME IS ${GO_PIPELINE_NAME}"
 aws s3api put-object-tagging  --bucket $S3_BUCKET --key $aws_path/$newjar --tagging "$json"
