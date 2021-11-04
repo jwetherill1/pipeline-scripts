@@ -38,10 +38,10 @@ if [[ "${GO_PIPELINE_NAME}" == "autocomplete-build" ]]; then
 elif [[ "${GO_PIPELINE_NAME}" == *"dev"* ]]; then    
     replaceTag "DevLastRun" "${json}" "${timestamp}"
     addTag "DevFirstRun" "${json}" "${timestamp}" 
-elif [[ "${GO_PIPELINE_NAME}" == *"bw-jw-build"* ]]; then
+elif [[ "${GO_PIPELINE_NAME}" == *"stage"* ]]; then
     replaceTag "StageLastRun" "${json}" "${timestamp}"
     addTag "StageFirstRun" "${json}" "${timestamp}"
-elif [[ "${GO_PIPELINE_NAME}" == *"prod"* ]]; then
+elif [[ "${GO_PIPELINE_NAME}" == *"bw-jw-build"* ]]; then
     replaceTag "ProdLastRun" "${json}" "${timestamp}"
     addTag "ProdFirstRun" "${json}" "${timestamp}"
     if [ -n "$(echo "$json" | jq '.TagSet[] | select(.Key=="ProdRunCount").Value')" ]; then
